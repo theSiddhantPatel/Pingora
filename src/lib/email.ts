@@ -1,23 +1,27 @@
-import { Resend } from "resend";
+import nodeMailer from "nodemailer";
 
-export const resendClient = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+const transporter = nodeMailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 export const sender = {
-  email: process.env.EMAIL_FROM || "onboarding@resend.dev",
-  name: process.env.EMAIL_FROM_NAME || "Pingora",
+  email: process.env.EMAIL_USER || "noreply@pingora.com",
+  name: process.env.EMAIL_FROM_NAME || "Siddhant Patel",
 };
 
 export async function sendWelcomeEmail(email: string, name: string, clientURL: string) {
-  if (!resendClient) {
-    console.log("Resend API key not configured, skipping welcome email");
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log("Email credentials not configured, skipping welcome email");
     return;
   }
 
   try {
-    const { data, error } = await resendClient.emails.send({
-      from: `${sender.name} <${sender.email}>`,
+    await transporter.sendMail({
+      from: `"${sender.name}" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Welcome to Pingora!",
       html: `
@@ -33,27 +37,20 @@ export async function sendWelcomeEmail(email: string, name: string, clientURL: s
         </div>
       `,
     });
-
-    if (error) {
-      console.error("Error sending welcome email:", error);
-    } else {
-      console.log("Welcome email sent:", data?.id);
-    }
+    console.log("Welcome email sent to:", email);
   } catch (err) {
     console.error("Failed to send welcome email:", err);
   }
 }
-
 export async function sendPasswordResetEmail(email: string, resetLink: string) {
-  if (!resendClient) {
-    console.log("Resend API key not configured, skipping password reset email");
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log("Email credentials not configured, skipping password reset email");
     console.log("Password reset link:", resetLink);
     return;
   }
-
   try {
-    const { data, error } = await resendClient.emails.send({
-      from: `${sender.name} <${sender.email}>`,
+    await transporter.sendMail({
+      from: `"${sender.name}" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Reset your Pingora password",
       html: `
@@ -78,12 +75,7 @@ export async function sendPasswordResetEmail(email: string, resetLink: string) {
         </div>
       `,
     });
-
-    if (error) {
-      console.error("Error sending password reset email:", error);
-    } else {
-      console.log("Password reset email sent:", data?.id);
-    }
+    console.log("Password reset email sent to:", email);
   } catch (err) {
     console.error("Failed to send password reset email:", err);
   }
