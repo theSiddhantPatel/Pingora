@@ -13,6 +13,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (user.hasChosenUsername) {
+      return NextResponse.json(
+        { message: "Username has already been set and cannot be changed." },
+        { status: 403 }
+      );
+    }
+
     const { username } = await req.json();
     const cleanUsername = (username || "").toLowerCase().trim().replace(/^@/, "");
 

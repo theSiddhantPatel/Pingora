@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth";
 import cloudinary from "@/lib/cloudinary";
 import User from "@/models/User";
-
 export async function PUT(req: NextRequest) {
   try {
     const user = await getAuthenticatedUser(req);
@@ -31,6 +30,13 @@ export async function PUT(req: NextRequest) {
     }
 
     if (username) {
+      if (user.hasChosenUsername) {
+        return NextResponse.json(
+          { message: "Username cannot be changed once set" },
+          { status: 403 }
+        );
+      }
+
       const cleanUsername = username.toLowerCase().trim().replace(/^@/, "");
       const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
       if (!usernameRegex.test(cleanUsername)) {
@@ -79,7 +85,7 @@ export async function PUT(req: NextRequest) {
       profilePic: updatedUser.profilePic,
       hasChosenUsername: Boolean(
         updatedUser.hasChosenUsername ||
-          (updatedUser.password && updatedUser.username)
+        (updatedUser.password && updatedUser.username)
       ),
     });
   } catch (error: any) {
