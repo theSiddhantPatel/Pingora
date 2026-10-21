@@ -77,14 +77,9 @@ function ProfileHeader() {
               {authUser.fullName}
             </h3>
             {authUser.username ? (
-              <Link
-                href="/choose-username"
-                className="text-cyan-400 hover:text-cyan-300 text-xs truncate flex items-center gap-1 group/u"
-                title="Change username"
-              >
-                <span>@{authUser.username}</span>
-                <span className="text-[10px] text-slate-500 group-hover/u:text-cyan-300 transition-colors">✎</span>
-              </Link>
+              <p className="text-cyan-400 text-xs truncate font-mono">
+                @{authUser.username}
+              </p>
             ) : (
               <Link
                 href="/choose-username"

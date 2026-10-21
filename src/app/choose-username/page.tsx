@@ -33,10 +33,14 @@ export default function ChooseUsernamePage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirect if not logged in
+  // Redirect if not logged in or if username has already been permanently set
   useEffect(() => {
-    if (!isCheckingAuth && !authUser) {
-      router.replace("/login");
+    if (!isCheckingAuth) {
+      if (!authUser) {
+        router.replace("/login");
+      } else if (authUser.hasChosenUsername) {
+        router.replace("/");
+      }
     }
   }, [authUser, isCheckingAuth, router]);
 
