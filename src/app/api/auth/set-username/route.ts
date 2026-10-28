@@ -13,6 +13,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const Thirty_Days = 30 * 24 * 60 * 60 * 1000;
+    if (user.lastUsernameChange) {
+      const timeSinceLastChange = Date.now() - new Date(user.lastUsernameChange).getTime();
+
+      if (timeSinceLastChange < Thirty_Days) {
+        const daysRemaining = Math.ceil((Thirty_Days - timeSinceLastChange) / (Thirty_Days / 30));
+
+        return NextResponse.json({
+          message: `you can only change your username once every 30 days. try again after ${daysRemaining} day(s)`
+        },
+          { status: 429 });
+      }
+    }
     const { username } = await req.json();
     const cleanUsername = (username || "").toLowerCase().trim().replace(/^@/, "");
 
@@ -43,6 +56,7 @@ export async function POST(req: NextRequest) {
 
     user.username = cleanUsername;
     user.hasChosenUsername = true;
+    user.lastUsernameChange = new Date();
     await user.save();
 
     return NextResponse.json({
@@ -52,6 +66,7 @@ export async function POST(req: NextRequest) {
       email: user.email,
       profilePic: user.profilePic,
       hasChosenUsername: true,
+      lastUsernameChange: user.lastUsernameChange,
     });
   } catch (error: any) {
     console.error("Set username error:", error);

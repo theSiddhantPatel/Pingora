@@ -13,6 +13,7 @@ export interface IUserDocument extends Document {
   hasChosenUsername?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  lastUsernameChange: Date;
 }
 
 const userSchema = new Schema<IUserDocument>(
@@ -65,6 +66,10 @@ const userSchema = new Schema<IUserDocument>(
     resetPasswordExpiresAt: {
       type: Date,
     },
+    lastUsernameChange: {
+      type: Date,
+      default: null,
+    }
   },
   { timestamps: true }
 );
